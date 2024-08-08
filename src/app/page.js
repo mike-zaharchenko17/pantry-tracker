@@ -133,30 +133,30 @@ export default function Home() {
         <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
           <h1 className="text-4xl text-purple-800 p-4 text-center">Pantry Inventory Manager</h1>
           <div className="bg-purple-900 mt-4 p-4 h-screen no-scrollbar overflow-auto rounded-lg">
-            <form className="grid grid-cols-6 items-center text-black">
+            <form className="grid grid-cols-10 md:grid-cols-6 items-center text-black">
   `            <input 
-                  className="col-start-1 col-span-3 sm:col-span-2 xs:col-span-2 p-3 border shadow-lg" 
+                  className="col-start-1 col-span-3 p-3 border shadow-lg" 
                   type="text" 
-                  placeholder="Enter Item"
+                  placeholder="Item"
                   onChange={(e) => setNewItem({...newItem, name: e.target.value})}
                   value={newItem.name} 
               />
               <input 
-                  className="col-span-1 p-3 border mx-3 shadow-lg"
+                  className="col-span-3 md:col-span-1 p-3 border mx-3 shadow-lg"
                   type="text"
-                  placeholder="Enter Quantity"
+                  placeholder="Quantity"
                   onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
                   value={newItem.quantity} 
               />
               <button
-                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 mr-3 text-lg sm:text-md xs:text-md shadow-lg"
+                  className="text-white h-12 max-sm:col-span-2 text-center bg-purple-700 hover:bg-purple-800 p-3 mr-3 text-md md:text-lg shadow-lg"
                   onClick={addItem} 
                   type="submit" 
               >
                   +
               </button>
               <button
-                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 text-lg sm:text-md xs:text-md shadow-lg"
+                  className="text-white h-12 max-sm:col-span-2 bg-purple-700 hover:bg-purple-800 p-3 text-md md:text-lg shadow-lg"
                   onClick={navToItemAdd}
                 >
                 Photo
@@ -178,8 +178,8 @@ export default function Home() {
                     className="p-4 w-full flex justify-between hover:bg-purple-800"
                     onClick={() => accessModal(item.id, item.name, item.quantity)}
                   >
-                    <span className="capitalize">{item.name}</span>
-                    <span>{item.quantity}</span>
+                    <span className="flex-1 break-all capitalize">{item.name}</span>
+                    <span className="whitespace-nowrap ml-2">{item.quantity}</span>
                   </div>
                   <button
                     className="p-4 border-l-2 border-purple-800 hover:bg-purple-800 w-16"
