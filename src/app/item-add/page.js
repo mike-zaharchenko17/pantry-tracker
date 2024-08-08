@@ -101,17 +101,8 @@ const CameraInterface = () => {
           />
          <div className="fixed flex flex-col-reverse items-center justify-around right-0 w-full bg-purple-400 bg-opacity-10 p-12 box-border z-20 
                         md:flex-col md:bottom-0 md:h-full m:h-full md:w-auto sm:w-auto md:p-2 sm:h-full
-                        sm: bottom-0 xs:bottom-0 xs:h-1/4">
-            <select
-              className="bg-purple-700 text-white rounded p-2 mx-2"
-              onChange={(event) => setActiveDeviceId(event.target.value)}
-            >
-              {devices.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label}
-                </option>
-              ))}
-            </select>
+                        sm: bottom-0 xs:bottom-0 xs:h-1/4"
+          >
             <button
               className="bg-purple-700 rounded text-lg text-center h-12 p-2 my-5"
               onClick={() => {

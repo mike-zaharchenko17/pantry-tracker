@@ -135,7 +135,7 @@ export default function Home() {
           <div className="bg-purple-900 mt-4 p-4 h-screen no-scrollbar overflow-auto rounded-lg">
             <form className="grid grid-cols-6 items-center text-black">
   `            <input 
-                  className="col-start-1 col-span-3 p-3 border shadow-lg" 
+                  className="col-start-1 col-span-3 sm:col-span-2 xs:col-span-2 p-3 border shadow-lg" 
                   type="text" 
                   placeholder="Enter Item"
                   onChange={(e) => setNewItem({...newItem, name: e.target.value})}
@@ -149,14 +149,14 @@ export default function Home() {
                   value={newItem.quantity} 
               />
               <button
-                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 mr-3 text-lg shadow-lg"
+                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 mr-3 text-lg sm:text-md xs:text-md shadow-lg"
                   onClick={addItem} 
                   type="submit" 
               >
                   +
               </button>
               <button
-                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 text-lg shadow-lg"
+                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 text-lg sm:text-md xs:text-md shadow-lg"
                   onClick={navToItemAdd}
                 >
                 Photo
@@ -215,7 +215,7 @@ export default function Home() {
                       value={updatedItem.quantity} 
                   />
                   <button
-                      className="col-span-1 text-white h-12 bg-purple-600 hover:bg-purple-700 p-3 text-lg rounded shadow-lg"
+                      className="col-span-1 text-white h-12 bg-purple-600 hover:bg-purple-700 p-3 text-lg sm:text-md xs:text-md rounded shadow-lg"
                       onClick={(e) => updateItem(e, modalItemId)} 
                       type="submit"
                   >
