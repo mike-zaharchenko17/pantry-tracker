@@ -1,113 +1,229 @@
-import Image from "next/image";
+"use client";
 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import ItemUpdateModal from '../../components/ItemUpdateModal.js';
+
+import 
+{ 
+  collection, 
+  doc, 
+  query, 
+  updateDoc,
+  addDoc,
+  deleteDoc,
+  getDoc, 
+  onSnapshot 
+} 
+from 'firebase/firestore';
+
+import { db } from '../../firebase.js';
+ 
 export default function Home() {
+  const router = useRouter();
+  const [items, setItems] = useState([{}]);
+  // { string, string }
+  const [newItem, setNewItem] = useState({ name: '', quantity: ''});
+  const [updatedItem, setUpdatedItem] = useState({ name: '', quantity: ''});
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalItemId, setModalItemId] = useState(null);
+  const [modalItemName, setModalItemName] = useState(null);
+  const [modalItemQuant, setModalItemQuant] = useState(null);
+
+  const deleteItem = async(id) => {
+    await deleteDoc(doc(db, 'pantry', id));
+  }
+
+  const crementItem = async (id, isIncrement) => {
+    // retrieve database collection
+    // retrieve reference to document based on id
+    const docRef = doc(db, "pantry", id);
+    // pull data from document reference by first pulling the
+    // document itself and then its data
+    const docData = (await getDoc(docRef)).data();
+    // update document to increment the quantity
+
+    // logic to decide whether to increment or decrement the item
+    if (isIncrement) {
+      await updateDoc(docRef, {
+        quantity: docData.quantity + 1
+      });
+    } else {
+      if (docData.quantity > 1) {
+        await updateDoc(docRef, {
+          quantity: docData.quantity - 1
+        });
+      }
+      if (docData.quantity === 1) {
+        await deleteDoc(docRef);
+      }
+    }
+  }
+
+  const addItem = async (e) => {
+    // refactor to include lookups and updates
+    e.preventDefault();
+    if (newItem.name !== '' && newItem.quantity !== '') {
+      let parsedInt = parseInt(newItem.quantity);
+      if (!(isNaN(parsedInt)) && parsedInt > 0) {
+        setItems([...items, newItem]);
+        await addDoc(collection(db, "pantry"), {
+          name: newItem.name.trim(),
+          quantity: parsedInt
+        });
+      }
+      setNewItem({name: '', quantity: ''});
+    } 
+  }
+  
+  const updateItem = async (e, itemId) => {
+    e.preventDefault();
+    if (updatedItem.name !== '' && updatedItem.quantity !== '') {
+      let parsedInt = parseInt(updatedItem.quantity);
+      if (!(isNaN(parsedInt)) && parsedInt > 0) {
+        let docRef = doc(db, "pantry", itemId);
+        await updateDoc(docRef, {
+          name: updatedItem.name,
+          quantity: parsedInt
+        });
+        setShowModal(false);
+      }
+    }
+  }
+
+  const navToItemAdd = (e) => {
+    e.preventDefault();
+    router.push("/item-add");
+  }
+
+  const accessModal = (id, itemName, itemQuant) => {
+    let itemQuantS = itemQuant.toString();
+    setModalItemId(id);
+    setModalItemName(itemName);
+    setModalItemQuant(itemQuant);
+    setUpdatedItem({name: itemName, quantity: itemQuantS});
+    setShowModal(true);
+  }
+
+  const closeModal = () => {
+    setShowModal(false);
+  }
+
+  useEffect(() => {
+    // create a query that fetches 'pantry' collection from database
+    const q = query(collection(db, 'pantry'));
+    // listen for changes to collection
+    // when there is a change to collection, create an array of the
+    // new items, copy everything over, and set that to the state variable
+    // that we will use to display items
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let itemsArr = [];
+      querySnapshot.forEach((doc) => {
+        itemsArr.push({...doc.data(), id: doc.id});
+      });
+      setItems(itemsArr);
+    });
+
+  }, []);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <main className="flex min-h-screen flex-col items-center justify-between sm:p-24 p-4 bg-white">
+        <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
+          <h1 className="text-4xl text-purple-800 p-4 text-center">Pantry Inventory Manager</h1>
+          <div className="bg-purple-900 mt-4 p-4 h-screen no-scrollbar overflow-auto rounded-lg">
+            <form className="grid grid-cols-6 items-center text-black">
+  `            <input 
+                  className="col-start-1 col-span-3 p-3 border shadow-lg" 
+                  type="text" 
+                  placeholder="Enter Item"
+                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                  value={newItem.name} 
+              />
+              <input 
+                  className="col-span-1 p-3 border mx-3 shadow-lg"
+                  type="text"
+                  placeholder="Enter Quantity"
+                  onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
+                  value={newItem.quantity} 
+              />
+              <button
+                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 mr-3 text-lg shadow-lg"
+                  onClick={addItem} 
+                  type="submit" 
+              >
+                  +
+              </button>
+              <button
+                  className="text-white h-12 bg-purple-700 hover:bg-purple-800 p-3 text-lg shadow-lg"
+                  onClick={navToItemAdd}
+                >
+                Photo
+                </button>
+            </form>
+            <ul>
+              {items.map((item, index) => (
+                  <li 
+                    className="my-4 w-full flex justify-between bg-purple-700 shadow-lg"
+                    key={index}
+                  >
+                  <button
+                    className="p-4 border-r-2 border-purple-800 hover:bg-purple-800 w-16"
+                    onClick={() => deleteItem(item.id)}
+                  >
+                    X
+                  </button>
+                  <div 
+                    className="p-4 w-full flex justify-between hover:bg-purple-800"
+                    onClick={() => accessModal(item.id, item.name, item.quantity)}
+                  >
+                    <span className="capitalize">{item.name}</span>
+                    <span>{item.quantity}</span>
+                  </div>
+                  <button
+                    className="p-4 border-l-2 border-purple-800 hover:bg-purple-800 w-16"
+                    onClick={() => crementItem(item.id, true)}
+                  >
+                    +
+                  </button>
+                  <button
+                    className="p-4 border-l-2 border-purple-800 hover:bg-purple-800 w-16"
+                    onClick={() => crementItem(item.id, false)}
+                  >
+                    -
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      </main>
+      <ItemUpdateModal isVisible={showModal} onClose={closeModal}>
+          <div className="bg-purple-800 mt-4 p-4 rounded-lg shadow-lg">
+              <form className="grid grid-cols-4 gap-4 items-center text-black">
+                  <input 
+                      className="col-span-2 p-3 border rounded shadow-lg" 
+                      type="text" 
+                      onChange={(e) => setUpdatedItem({...updatedItem, name: e.target.value})}
+                      value={updatedItem.name} 
+                  />
+                  <input 
+                      className="col-span-1 p-3 border rounded shadow-lg" 
+                      type="text"
+                      onChange={(e) => setUpdatedItem({...updatedItem, quantity: e.target.value})}
+                      value={updatedItem.quantity} 
+                  />
+                  <button
+                      className="col-span-1 text-white h-12 bg-purple-600 hover:bg-purple-700 p-3 text-lg rounded shadow-lg"
+                      onClick={(e) => updateItem(e, modalItemId)} 
+                      type="submit"
+                  >
+                      Update
+                  </button>
+              </form>
+          </div>
+      </ItemUpdateModal>
+    </>
   );
 }
