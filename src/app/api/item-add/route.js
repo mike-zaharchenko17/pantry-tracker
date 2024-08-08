@@ -75,20 +75,7 @@ export async function POST(request) {
             }));
         }
 
-        // on completion of all promises
-        Promise.all(promiseArr)
-            .then((results) => {
-                console.log("All items added to database");
-            })
-            .catch((error) => {
-                console.log("Some item(s) were not added");
-                return new Response(JSON.stringify(parsedObject), {
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    status: 500
-                });
-            });
+        await Promise.all(promiseArr);
 
         return new Response(JSON.stringify(parsedObject), {
             headers: {
@@ -96,8 +83,9 @@ export async function POST(request) {
             },
             status: 201
         });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error in POST request:", error);
         return new Response(JSON.stringify({ error: error.message }), {
             headers: {
                 "Content-Type": "application/json"
