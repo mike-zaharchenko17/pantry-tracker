@@ -68,6 +68,7 @@ export async function POST(request) {
         // way to do this
         let promiseArr = []; 
         for (const [k, v] of Object.entries(parsedObject)) {
+            console.log(`Adding ${k} to promise array`)
             promiseArr.push(addDoc(collection(db, "pantry"), {
                 name: k,
                 quantity: v
@@ -81,9 +82,14 @@ export async function POST(request) {
             })
             .catch((error) => {
                 console.log("Some item(s) were not added");
+                return new Response(JSON.stringify(parsedObject), {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    status: 500
+                });
             });
 
-        //
         return new Response(JSON.stringify(parsedObject), {
             headers: {
                 "Content-Type": "application/json"
