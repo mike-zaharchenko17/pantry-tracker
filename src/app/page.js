@@ -130,7 +130,7 @@ export default function Home() {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-between sm:p-24 p-4 bg-white">
-        <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
+        <div className="w-full max-w-5xl items-center justify-between font-mono text-sm">
           <h1 className="text-4xl text-purple-800 p-4 text-center">Pantry Inventory Manager</h1>
           <div className="bg-purple-900 mt-4 p-4 h-screen no-scrollbar overflow-auto rounded-lg">
             <form className="grid grid-cols-10 md:grid-cols-6 items-center text-black">
@@ -200,29 +200,29 @@ export default function Home() {
         </div>
       </main>
       <ItemUpdateModal isVisible={showModal} onClose={closeModal}>
-          <div className="bg-purple-800 mt-4 p-4 rounded-lg shadow-lg">
-              <form className="grid grid-cols-4 gap-4 items-center text-black">
-                  <input 
-                      className="col-span-2 p-3 border rounded shadow-lg" 
-                      type="text" 
-                      onChange={(e) => setUpdatedItem({...updatedItem, name: e.target.value})}
-                      value={updatedItem.name} 
-                  />
-                  <input 
-                      className="col-span-1 p-3 border rounded shadow-lg" 
-                      type="text"
-                      onChange={(e) => setUpdatedItem({...updatedItem, quantity: e.target.value})}
-                      value={updatedItem.quantity} 
-                  />
-                  <button
-                      className="col-span-1 text-white h-12 bg-purple-600 hover:bg-purple-700 p-3 text-lg sm:text-md xs:text-md rounded shadow-lg"
-                      onClick={(e) => updateItem(e, modalItemId)} 
-                      type="submit"
-                  >
-                      Update
-                  </button>
-              </form>
-          </div>
+        <div className="bg-purple-800 mt-4 p-4 rounded-lg shadow-lg">
+            <form className="grid grid-cols-4 gap-4 items-center text-black">
+                <input 
+                    className="col-span-2 p-3 border rounded shadow-lg" 
+                    type="text" 
+                    onChange={(e) => setUpdatedItem({...updatedItem, name: e.target.value})}
+                    value={updatedItem.name} 
+                />
+                <input 
+                    className="col-span-1 p-3 border rounded shadow-lg" 
+                    type="text"
+                    onChange={(e) => setUpdatedItem({...updatedItem, quantity: e.target.value})}
+                    value={updatedItem.quantity} 
+                />
+                <button
+                    className="col-span-1 text-white h-12 bg-purple-600 hover:bg-purple-700 p-3 text-lg sm:text-md xs:text-md rounded shadow-lg"
+                    onClick={(e) => updateItem(e, modalItemId)} 
+                    type="submit"
+                >
+                    Update
+                </button>
+            </form>
+        </div>
       </ItemUpdateModal>
     </>
   );
